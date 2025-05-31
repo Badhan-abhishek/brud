@@ -1,12 +1,10 @@
 package blogpost
 
 import (
-	"errors"
 	"log"
 
 	_ "be.blog/docs"
 	usecase "be.blog/internal/usecase/blog_post"
-	customerrors "be.blog/pkg/custom_errors"
 	"be.blog/pkg/response"
 	"github.com/gofiber/fiber/v2"
 )

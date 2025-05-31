@@ -5,6 +5,7 @@ import (
 
 	customerrors "be.blog/pkg/custom_errors"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/log"
 )
 
 type ErrorResponse struct {
@@ -37,17 +38,20 @@ func (e *ErrorHandler) SendCustomError(err error) error {
 	var status int
 	var message string
 	errorMessage := err.Error()
-	switch {
-	case customerrors.RepoItemNotFound == errorMessage:
-	case customerrors.RepoIDNotFound == errorMessage:
+
+	switch errorMessage {
+	case customerrors.RepoItemNotFound, customerrors.RepoIDNotFound:
 		status = fiber.StatusNotFound
 		message = fmt.Sprintf("%s not found", e.name)
-	case customerrors.RepoItemAlreadyExists == errorMessage:
+
+	case customerrors.RepoItemAlreadyExists:
 		status = fiber.StatusConflict
 		message = fmt.Sprintf("%s already exists", e.name)
-	case customerrors.RepoForeignKeyViolation == errorMessage:
+
+	case customerrors.RepoForeignKeyViolation:
 		status = fiber.StatusBadRequest
 		message = fmt.Sprintf("Cannot delete %s, it is referenced by another %s", e.name, e.pluralName)
+
 	default:
 		status = fiber.StatusInternalServerError
 		message = fmt.Sprintf("An error occurred while processing %s: %s", e.name, errorMessage)
