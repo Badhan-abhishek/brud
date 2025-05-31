@@ -1,0 +1,239 @@
+basePath: /api
+definitions:
+  blogpost.BlogPost:
+    properties:
+      author:
+        type: string
+      body:
+        type: string
+      createdAt:
+        type: string
+      descriptions:
+        items:
+          type: string
+        type: array
+      id:
+        type: string
+      metaDescription:
+        type: string
+      published:
+        type: boolean
+      slug:
+        type: string
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  blogpost.CreateBlogPost:
+    properties:
+      author:
+        type: string
+      body:
+        type: string
+      descriptions:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    required:
+    - author
+    - body
+    - descriptions
+    - title
+    type: object
+  blogpost.UpdateBlogPost:
+    properties:
+      author:
+        type: string
+      body:
+        type: string
+      descriptions:
+        items:
+          type: string
+        type: array
+      title:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  response.SuccessResponse:
+    properties:
+      message:
+        type: string
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: BRUD, a Blog CRUD application.
+  title: BRUD
+  version: "1.0"
+paths:
+  /api/blog-post:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve all blog posts with optional limit and skip parameters
+      parameters:
+      - description: Limit the number of blog posts returned
+        in: query
+        name: limit
+        type: integer
+      - description: Skip the first N blog posts
+        in: query
+        name: skip
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/blogpost.BlogPost'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get all blog posts
+      tags:
+      - BlogPost
+    post:
+      consumes:
+      - application/json
+      description: Create a new blog post with title, body, author, and descriptions
+      parameters:
+      - description: Blog Post
+        in: body
+        name: blogPost
+        required: true
+        schema:
+          $ref: '#/definitions/blogpost.CreateBlogPost'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/blogpost.BlogPost'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Create a new blog post
+      tags:
+      - BlogPost
+  /api/blog-post/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a blog post by its ID
+      parameters:
+      - description: Blog Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SuccessResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Delete a blog post by ID
+      tags:
+      - BlogPost
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a blog post by its ID
+      parameters:
+      - description: Blog Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/blogpost.BlogPost'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Get a blog post by ID
+      tags:
+      - BlogPost
+    patch:
+      consumes:
+      - application/json
+      description: Update a blog post by its ID with new title, body, author, and
+        descriptions
+      parameters:
+      - description: Blog Post ID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Blog Post
+        in: body
+        name: blogPost
+        required: true
+        schema:
+          $ref: '#/definitions/blogpost.UpdateBlogPost'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/blogpost.BlogPost'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Update a blog post by ID
+      tags:
+      - BlogPost
+swagger: "2.0"
