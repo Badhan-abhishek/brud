@@ -8,6 +8,7 @@ import (
 	blogpost "be.blog/internal/delivery/blog_post"
 	"be.blog/pkg/database"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/swagger"
 )
 
@@ -15,9 +16,14 @@ import (
 // @version		1.0
 // @description	BRUD, a Blog CRUD application.
 // @host			localhost:3000
-// @BasePath		/api
+// @BasePath		/
 func main() {
 	app := fiber.New()
+
+	// For development purposes, enable CORS for all origins.
+	app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+	}))
 
 	cfg := configs.Load()
 

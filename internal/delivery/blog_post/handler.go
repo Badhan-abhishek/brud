@@ -1,10 +1,12 @@
 package blogpost
 
 import (
+	"errors"
 	"log"
 
 	_ "be.blog/docs"
 	usecase "be.blog/internal/usecase/blog_post"
+	customerrors "be.blog/pkg/custom_errors"
 	"be.blog/pkg/response"
 	"github.com/gofiber/fiber/v2"
 )
@@ -40,21 +42,23 @@ func (h *Handler) RegisterRoutes(r fiber.Router) {
 // @Param			blogPost	body		CreateBlogPost	true	"Blog Post"
 // @Success		201			{object}	blogpost.BlogPost
 // @Failure		400			{object}	response.ErrorResponse
+// @Failure		409			{object}	response.ErrorResponse
 // @Failure		500			{object}	response.ErrorResponse
 // @Router			/api/blog-post [post]
 func (handler *Handler) CreateBlogPost(c *fiber.Ctx) error {
+	errorHandler := response.NewErrorHandler(c, "Blog Post", "Blog Posts")
 
 	var input CreateBlogPost
 	if err := c.BodyParser(&input); err != nil {
-		return response.SendError(c, fiber.StatusBadRequest, "Invalid input data")
+		return errorHandler.SendError(fiber.StatusBadRequest, "Invalid input data")
 	}
 	post, err := handler.usecase.CreatePost(input.Title, input.Body, input.Author, input.Descriptions, nil)
 	if err != nil {
 		log.Println("Error creating blog post:", err)
-		return response.SendError(c, fiber.StatusInternalServerError, "Failed to create blog post")
+		return errorHandler.SendCustomError(err)
 	}
 
-	return response.SendData(c, fiber.StatusCreated, post)
+	return errorHandler.SendData(fiber.StatusCreated, post)
 }
 
 // @Tags			BlogPost
@@ -68,15 +72,16 @@ func (handler *Handler) CreateBlogPost(c *fiber.Ctx) error {
 // @Failure		500		{object}	response.ErrorResponse
 // @Router			/api/blog-post [get]
 func (handler *Handler) GetAll(c *fiber.Ctx) error {
+	errorHandler := response.NewErrorHandler(c, "Blog Post", "Blog Posts")
 	limit := c.QueryInt("limit", 10)
 	skip := c.QueryInt("skip", 0)
 	posts, err := handler.usecase.GetAll(&limit, &skip)
 	if err != nil {
 		log.Println("Error fetching blog posts:", err)
-		return response.SendError(c, fiber.StatusInternalServerError, "Failed to fetch blog posts")
+		return errorHandler.SendCustomError(err)
 	}
 
-	return response.SendData(c, fiber.StatusOK, posts)
+	return errorHandler.SendData(fiber.StatusOK, posts)
 }
 
 // @Tags			BlogPost
@@ -91,22 +96,23 @@ func (handler *Handler) GetAll(c *fiber.Ctx) error {
 // @Failure		500	{object}	response.ErrorResponse
 // @Router			/api/blog-post/{id} [get]
 func (handler *Handler) Get(c *fiber.Ctx) error {
+	errorHandler := response.NewErrorHandler(c, "Blog Post", "Blog Posts")
 	id := c.Params("id")
 	if id == "" {
-		return response.SendError(c, fiber.StatusBadRequest, "Blog post ID is required")
+		return errorHandler.SendError(fiber.StatusBadRequest, "Blog post ID is required")
 	}
 
 	post, err := handler.usecase.Get(id)
 	if err != nil {
 		log.Println("Error fetching blog post:", err)
-		return response.SendError(c, fiber.StatusInternalServerError, "Failed to fetch blog post")
+		return errorHandler.SendCustomError(err)
 	}
 
 	if post == nil {
-		return response.SendError(c, fiber.StatusNotFound, "Blog post not found")
+		return errorHandler.SendError(fiber.StatusNotFound, "Blog post not found")
 	}
 
-	return response.SendData(c, fiber.StatusOK, post)
+	return errorHandler.SendData(fiber.StatusOK, post)
 }
 
 // @Tags			BlogPost
@@ -121,17 +127,18 @@ func (handler *Handler) Get(c *fiber.Ctx) error {
 // @Failure		500	{object}	response.ErrorResponse
 // @Router			/api/blog-post/{id} [delete]
 func (handler *Handler) Delete(c *fiber.Ctx) error {
+	errorHandler := response.NewErrorHandler(c, "Blog Post", "Blog Posts")
 	id := c.Params("id")
 	if id == "" {
-		return response.SendError(c, fiber.StatusBadRequest, "Blog post ID is required")
+		return errorHandler.SendError(fiber.StatusBadRequest, "Blog post ID is required")
 	}
 
 	if err := handler.usecase.Delete(id); err != nil {
 		log.Println("Error deleting blog post:", err)
-		return response.SendError(c, fiber.StatusInternalServerError, "Failed to delete blog post")
+		return errorHandler.SendCustomError(err)
 	}
 
-	return response.SendSuccess(c, fiber.StatusOK, "Blog post deleted successfully")
+	return errorHandler.SendSuccess(fiber.StatusOK, "Blog post deleted successfully")
 }
 
 // @Tags			BlogPost
@@ -144,21 +151,24 @@ func (handler *Handler) Delete(c *fiber.Ctx) error {
 // @Success		200			{object}	blogpost.BlogPost
 // @Failure		400			{object}	response.ErrorResponse
 // @Failure		404			{object}	response.ErrorResponse
+// @Failure		409			{object}	response.ErrorResponse
 // @Failure		500			{object}	response.ErrorResponse
 // @Router			/api/blog-post/{id} [patch]
 func (handler *Handler) Update(c *fiber.Ctx) error {
+	errorHandler := response.NewErrorHandler(c, "Blog Post", "Blog Posts")
 	id := c.Params("id")
 	if id == "" {
-		return response.SendError(c, fiber.StatusBadRequest, "Blog post ID is required")
+		return errorHandler.SendError(fiber.StatusBadRequest, "Blog post ID is required")
 	}
 	var input UpdateBlogPost
 	if err := c.BodyParser(&input); err != nil {
-		return response.SendError(c, fiber.StatusBadRequest, "Invalid input data")
+		return errorHandler.SendError(fiber.StatusBadRequest, "Invalid input data")
 	}
 	err := handler.usecase.Update(id, input.Title, input.Body, input.Author, input.Descriptions, nil)
 	if err != nil {
 		log.Println("Error updating blog post:", err)
-		return response.SendError(c, fiber.StatusInternalServerError, "Failed to update blog post")
+		return errorHandler.SendCustomError(err)
 	}
-	return response.SendData(c, fiber.StatusOK, input)
+
+	return errorHandler.SendData(fiber.StatusOK, input)
 }

@@ -1,6 +1,11 @@
 package response
 
-import "github.com/gofiber/fiber/v2"
+import (
+	"fmt"
+
+	customerrors "be.blog/pkg/custom_errors"
+	"github.com/gofiber/fiber/v2"
+)
 
 type ErrorResponse struct {
 	Message string `json:"message"`
@@ -10,19 +15,60 @@ type SuccessResponse struct {
 	Message string `json:"message"`
 }
 
-func SendError(c *fiber.Ctx, status int, message string) error {
+type ErrorHandler struct {
+	ctx        *fiber.Ctx
+	name       string
+	pluralName string
+}
+
+func NewErrorHandler(ctx *fiber.Ctx, name, pluralName string) *ErrorHandler {
+	return &ErrorHandler{
+		ctx:        ctx,
+		name:       name,
+		pluralName: pluralName,
+	}
+}
+
+func (e *ErrorHandler) SendCustomError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	var status int
+	var message string
+	errorMessage := err.Error()
+	switch {
+	case customerrors.RepoItemNotFound == errorMessage:
+	case customerrors.RepoIDNotFound == errorMessage:
+		status = fiber.StatusNotFound
+		message = fmt.Sprintf("%s not found", e.name)
+	case customerrors.RepoItemAlreadyExists == errorMessage:
+		status = fiber.StatusConflict
+		message = fmt.Sprintf("%s already exists", e.name)
+	case customerrors.RepoForeignKeyViolation == errorMessage:
+		status = fiber.StatusBadRequest
+		message = fmt.Sprintf("Cannot delete %s, it is referenced by another %s", e.name, e.pluralName)
+	default:
+		status = fiber.StatusInternalServerError
+		message = fmt.Sprintf("An error occurred while processing %s: %s", e.name, errorMessage)
+	}
+
+	return e.SendError(status, message)
+}
+
+func (e *ErrorHandler) SendError(status int, message string) error {
 	response := ErrorResponse{
 		Message: message,
 	}
-	return c.Status(status).JSON(response)
+	return e.ctx.Status(status).JSON(response)
 }
 
-func SendData(c *fiber.Ctx, status int, data any) error {
-	return c.Status(status).JSON(data)
+func (e *ErrorHandler) SendData(status int, data any) error {
+	return e.ctx.Status(status).JSON(data)
 }
 
-func SendSuccess(c *fiber.Ctx, status int, message string) error {
-	return c.Status(status).JSON(SuccessResponse{
+func (e *ErrorHandler) SendSuccess(status int, message string) error {
+	return e.ctx.Status(status).JSON(SuccessResponse{
 		Message: message,
 	})
 }
