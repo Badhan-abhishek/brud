@@ -5,7 +5,6 @@ import (
 
 	customerrors "be.blog/pkg/custom_errors"
 	"github.com/gofiber/fiber/v2"
-	"github.com/gofiber/fiber/v2/log"
 )
 
 type ErrorResponse struct {
