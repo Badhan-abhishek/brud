@@ -6,7 +6,7 @@
         "contact": {},
         "version": "1.0"
     },
-    "host": "https://brud.onrender.com",
+    "host": "brud.onrender.com",
     "basePath": "/",
     "paths": {
         "/api/blog-post": {

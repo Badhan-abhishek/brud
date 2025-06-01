@@ -66,7 +66,7 @@ definitions:
       message:
         type: string
     type: object
-host: https://brud.onrender.com
+host: brud.onrender.com
 info:
   contact: {}
   description: BRUD, a Blog CRUD application.
