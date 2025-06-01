@@ -61,6 +61,9 @@ You can access server at [http://localhost:3000](http://localhost:3000).
 
 And the Swagger documentation at [http://localhost:3000/swagger/index.html](http://localhost:3000/swagger/index.html).
 
+# Postman
+- Postman collection can be found in the root of this project.
+
 # TASK
 
 Problem Statement:

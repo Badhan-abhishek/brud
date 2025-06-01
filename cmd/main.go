@@ -15,7 +15,7 @@ import (
 // @title			BRUD
 // @version		1.0
 // @description	BRUD, a Blog CRUD application.
-// @host			localhost:3000
+// @host			https://brud.onrender.com
 // @BasePath		/
 func main() {
 	app := fiber.New()
